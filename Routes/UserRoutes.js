@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { body, validationResult } = require('express-validator');
-const { createUser, loginUser, getAllUsers, getUserById, updateUser, deleteUser } = require('../Controllers/UserController');
+const { createUser, loginUser, getAllUsers, getUserById, updateUser, deleteUser, forgotPassword } = require('../Controllers/UserController');
 
 const validateUser = [
     body('firstname').trim().notEmpty().withMessage('First name is required'),
@@ -23,6 +23,10 @@ const handleValidation = (req, res, next) => {
 
 router.post('/', validateUser, handleValidation, createUser);
 router.post('/login', validateLogin, handleValidation, loginUser);
+router.post('/forgot-password', [
+    body('email').isEmail().withMessage('Valid email is required'),
+    body('password').isLength({ min: 8 }).withMessage('Password must be at least 8 characters'),
+], handleValidation, forgotPassword);
 router.get('/', getAllUsers);
 router.get('/:id', getUserById);
 router.put('/:id', updateUser);

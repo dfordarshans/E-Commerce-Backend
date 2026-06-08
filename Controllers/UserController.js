@@ -81,4 +81,18 @@ const loginUser = async (req, res) => {
     }
 };
 
-module.exports = { createUser, loginUser, getAllUsers, getUserById, updateUser, deleteUser };
+const forgotPassword = async (req, res) => {
+    try {
+        const { email, password } = req.body;
+        const user = await User.findOne({ email });
+        if (!user) return res.status(404).json({ message: 'No account found with this email address.' });
+
+        user.password = await bcrypt.hash(password, 10);
+        await user.save();
+        res.status(200).json({ message: 'Password reset successfully' });
+    } catch (error) {
+        res.status(500).json({ message: 'Error resetting password', error: error.message });
+    }
+};
+
+module.exports = { createUser, loginUser, getAllUsers, getUserById, updateUser, deleteUser, forgotPassword };
