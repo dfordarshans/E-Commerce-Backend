@@ -12,10 +12,19 @@ const OrderRoutes   = require('./Routes/OrderRoutes');
 const app = express();
 
 const allowedOrigins = process.env.CLIENT_URL
-    ? process.env.CLIENT_URL.split(',').map((o) => o.trim())
-    : ['http://localhost:3000'];
+    ? process.env.CLIENT_URL.split(',').map((o) => o.trim().replace(/\/$/, ''))
+    : ['http://localhost:3000', 'http://localhost:3001'];
 
-app.use(helmet());
+app.use(helmet({
+    contentSecurityPolicy: {
+        directives: {
+            defaultSrc: ["'self'"],
+            imgSrc: ["'self'", "data:", "https://images.unsplash.com", "https://*.unsplash.com"],
+            styleSrc: ["'self'", "https:", "'unsafe-inline'"],
+            scriptSrc: ["'self'"],
+        },
+    },
+}));
 app.use(cors({
     origin: (origin, callback) => {
         if (!origin || allowedOrigins.includes(origin)) return callback(null, true);
@@ -25,6 +34,7 @@ app.use(cors({
     credentials: true,
 }));
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 app.get('/health', (req, res) => res.status(200).json({ status: 'ok' }));
 app.use('/api/user',    UserRoutes);

@@ -1,4 +1,20 @@
 const Product = require('../Models/ProductModel');
+const { cloudinary } = require('../Utils/cloudinary');
+
+const uploadProductImage = async (req, res) => {
+    try {
+        if (!req.file) return res.status(400).json({ message: 'No image uploaded' });
+        const updated = await Product.findByIdAndUpdate(
+            req.params.id,
+            { image: req.file.path },
+            { new: true }
+        );
+        if (!updated) return res.status(404).json({ message: 'Product not found' });
+        res.status(200).json({ message: 'Image uploaded', data: updated });
+    } catch (error) {
+        res.status(500).json({ message: 'Error uploading image', error: error.message });
+    }
+};
 
 const createProduct = async (req, res) => {
     try {
@@ -52,4 +68,4 @@ const deleteProduct = async (req, res) => {
     }
 };
 
-module.exports = { createProduct, getAllProducts, getProductById, updateProduct, deleteProduct };
+module.exports = { createProduct, getAllProducts, getProductById, updateProduct, deleteProduct, uploadProductImage };
